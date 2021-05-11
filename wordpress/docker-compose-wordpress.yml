@@ -1,0 +1,38 @@
+version: '3.6'
+
+services:
+    db:
+        image: mysql:5.7
+        container_name: wp_mysql
+        volumes:
+          - ./data/mysql:/var/lib/mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: wordpress
+            MYSQL_DATABASE: wordpress
+            MYSQL_USER: wordpress
+            MYSQL_PASSWORD: wordpress
+        networks:
+          - wordpress-compose-network
+
+    wordpress:
+        image: wordpress:latest
+        container_name: wp_web
+        depends_on:
+            - db
+        ports:
+            - 8000:80
+        networks:
+            - wordpress-compose-network
+        restart: unless-stopped
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: wordpress
+            WORDPRESS_DB_NAME: wordpress
+            WORDPRESS_DB_PASSWORD: wordpress
+        volumes:
+            - ./data/wp_html:/var/www/html
+            - ./config/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+networks:
+  wordpress-compose-network:
+    driver: bridge
